@@ -1,29 +1,100 @@
-var map = L.map("map", {center: [-115.6985,36.733,],zoom: 8});
+var url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson";
 
-L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-  attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
-  maxZoom: 18,
-  id: "mapbox.streets",
-  accessToken: API_KEY
-}).addTo(map);
-
-var data = "../data/earthquakes.json";
-var geodata;
-
-d3.json(data, function(data){
-    geodata = L.choropleth(data,{
-        valueProperty: "MHI2016",
-        scale: ["#F4D03F","#B80303"],
-        steps:10,
-        mode:"q",
-        style:{
-            color:"#fff",
-            weight:1,
-            fillOpacity:0.8
-        },
-        onFeature: function(feature,layer){
-            layer.bindPopup("Zip Code " + feature.properties.zip + "<br>Earthquake");
-        }
-    }).addTo(map);
-    
+d3.json(url,function(data){
+    //createFeatures(data.features);
+    createCircles(data.features);
 })
+
+
+// function createFeatures(data){
+//     function onEachFeature(feature, layer) {
+//         layer.bindPopup("<h3>" + feature.properties.place +
+//       "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
+//     }
+
+//     var earthquakes = L.geoJSON(data, {
+//     onEachFeature: onEachFeature
+//     });
+
+//     createMap(earthquakes);
+// }
+
+function createCircles(data){
+    function onFeature(features, layer) {
+    var color = "";
+    if (features.properties.mag >= 5) {
+        color = "#B80303";
+    }
+    else if (features.properties.mag > 4) {
+        color = "#DA6823";
+    }
+    else if (features.properties.mag > 3) {
+        color = "#D68B00";
+    }
+    else if (features.properties.mag > 2) {
+        color = "#D6AC00";
+    }
+    else if (features.properties.mag > 1) {
+    color = "#D6D300";
+    }
+    else {
+        color = "#ACD600";
+    }
+        
+    L.circle(features.location, {
+        fillOpacity: 0.75,
+        color: "white",
+        fillColor: color,
+        // Adjust radius
+        radius: features.properties.mag * 10000000000000000
+        })/*.bindPopup("<h1>" + features.place + "</h1> <hr> <h3>Magnatude: " + features.properties.mag + "</h3>");*/
+        
+    }
+    var circles = L.geoJSON(data, {
+        onEachFeature: onFeature
+    });
+    createMap(circles);
+}
+
+function createMap(earthquakes){
+    var satellite =L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+        attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+        maxZoom: 18,
+        id: "mapbox.satellite",
+        accessToken: API_KEY
+    });
+
+    var outdoors =L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+        attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+        maxZoom: 18,
+        id: "mapbox.outdoors",
+        accessToken: API_KEY
+    });
+
+    var v8 =L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+        attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+        maxZoom: 18,
+        id: "mapbox.mapbox-streets-v8",
+        accessToken: API_KEY
+    });
+
+    var baseMaps = {
+        "Satellite": satellite,
+        "Outdoors": outdoors,
+        "Retro": v8
+    };
+    
+    var overlayMaps = {
+    Earthquakes: earthquakes
+    };
+
+    var map = L.map("map", {
+    center: [37.09, -95.71],
+    zoom: 4,
+    layers: [satellite,outdoors,v8, earthquakes]
+    });
+    
+      L.control.layers(baseMaps, overlayMaps, {
+        collapsed: false
+      }).addTo(map);
+}
