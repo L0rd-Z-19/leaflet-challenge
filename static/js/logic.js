@@ -81,7 +81,7 @@ function createMap(earthquakes,data){
         else {
             color = "#ACD600";
         }
-            
+
         //get the correct coordinates
         var coords = features.geometry.coordinates;
         coords = [coords[1], coords[0]];
@@ -94,6 +94,26 @@ function createMap(earthquakes,data){
             radius: features.properties.mag * 100000
         }).addTo(map)/*.bindPopup("<h1>" + features.place + "</h1> <hr> <h3>Magnatude: " + features.properties.mag + "</h3>");*/
     } 
+    var legend = L.control({position: "bottomleft"});
+        var colors = ["#B80303","#DA6823","#D68B00","#D6AC00","#D6D300","#ACD600"];
+        labels = ["0-1","1-2","2-3","3-4","4-5","5+"];
+
+        legend.onAdd = function(map) {
+        
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML += "<h4>Magnatude</h4>";    
+            div.innerHTML += '<i style="background: ' + colors[5] + '"></i><span>'+ labels[0] +'</span><br>';
+            div.innerHTML += '<i style="background: ' + colors[4] + '"></i><span>'+ labels[1] +'</span><br>';
+            div.innerHTML += '<i style="background: ' + colors[3] + '"></i><span>'+ labels[2] +'</span><br>';
+            div.innerHTML += '<i style="background: ' + colors[2] + '"></i><span>'+ labels[3] +'</span><br>';
+            div.innerHTML += '<i style="background: ' + colors[1] + '"></i><span>'+ labels[4] +'</span><br>';
+            div.innerHTML += '<i style="background: ' + colors[0] + '"></i><span>'+ labels[5] +'</span><br>';
+            // loop through our density intervals and generate a label with a colored square for each interval
+            
+            return div;
+        };
+        
+        legend.addTo(map);
 }
 
 
