@@ -92,7 +92,7 @@ function createMap(earthquakes,data){
             fillColor: color,
             // Adjust radius
             radius: features.properties.mag * 100000
-        }).addTo(map)/*.bindPopup("<h1>" + features.place + "</h1> <hr> <h3>Magnatude: " + features.properties.mag + "</h3>");*/
+        }).addTo(map).bindPopup("<h1>" + features.properties.place + "</h1> <hr> <h3>Magnatude: " + features.properties.mag + "</h3><hr><p>" + new Date(features.properties.time) + "</p>");
     } 
     var legend = L.control({position: "bottomleft"});
         var colors = ["#B80303","#DA6823","#D68B00","#D6AC00","#D6D300","#ACD600"];
